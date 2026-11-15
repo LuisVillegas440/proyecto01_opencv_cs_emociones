@@ -57,8 +57,8 @@ No se usa TensorFlow ni PyTorch: toda la inferencia se ejecuta con el módulo `d
 
 ```bash
 # 1. Clonar el repositorio
-git clone <URL-DEL-REPOSITORIO>
-cd django_proyecto_cs
+git clone https://github.com/LuisVillegas440/proyecto01_opencv_cs_emociones.git
+cd proyecto01_opencv_cs_emociones
 
 # 2. Crear y activar el entorno virtual
 python -m venv venv
@@ -125,7 +125,7 @@ flowchart LR
 ## Estructura del proyecto
 
 ```
-django_proyecto_cs/
+proyecto01_opencv_cs_emociones/
 ├── config/                     # Configuración del proyecto Django
 │   ├── settings.py             #   rutas a los modelos y umbral de detección al final
 │   └── urls.py
