@@ -1,0 +1,24 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}EmoVisión{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'emociones/css/estilos.css' %}">
+</head>
+<body>
+  <header class="barra">
+    <a class="marca" href="{% url 'emociones:camara' %}">Emo<span>Visión</span></a>
+    <nav>
+      {% with nombre=request.resolver_match.url_name %}
+      <a href="{% url 'emociones:camara' %}" class="{% if nombre == 'camara' or nombre == 'camara_alias' %}activo{% endif %}">Cámara</a>
+      <a href="{% url 'emociones:historial' %}" class="{% if nombre == 'historial' or nombre == 'detalle_sesion' %}activo{% endif %}">Historial</a>
+      {% endwith %}
+    </nav>
+  </header>
+  <main class="contenido">
+    {% block contenido %}{% endblock %}
+  </main>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

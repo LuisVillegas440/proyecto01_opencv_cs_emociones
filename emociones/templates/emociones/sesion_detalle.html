@@ -1,0 +1,123 @@
+{% extends 'emociones/base.html' %}
+{% load static %}
+{% block titulo %}{{ sesion.nombre }} · EmoVisión{% endblock %}
+{% block contenido %}
+<a class="volver" href="{% url 'emociones:historial' %}">← Historial</a>
+
+<div class="encabezado">
+  <div>
+    <h1>{{ sesion.nombre }} {% if sesion.en_curso %}<span class="insignia en-curso">en curso</span>{% endif %}</h1>
+    <p class="suave">
+      {{ sesion.inicio|date:"d/m/Y H:i:s" }}
+      {% if sesion.fin %} → {{ sesion.fin|date:"H:i:s" }}{% endif %}
+      {% if sesion.descripcion %} · {{ sesion.descripcion }}{% endif %}
+    </p>
+  </div>
+  {% if est.total %}
+  <a class="btn primario" href="{% url 'emociones:exportar_csv' sesion.pk %}">Descargar CSV</a>
+  {% endif %}
+</div>
+
+{% if est.total %}
+<section class="tarjetas">
+  <div class="tarjeta destacada" style="--c: {{ est.predominante_info.color }}">
+    <span class="tarjeta-titulo">Emoción predominante</span>
+    <span class="tarjeta-valor">{{ est.predominante_info.emoji }} {{ est.predominante_info.etiqueta }}</span>
+    <span class="tarjeta-nota">{{ est.predominante_pct }}% de las muestras</span>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta-titulo">Duración</span>
+    <span class="tarjeta-valor">{{ est.duracion }}</span>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta-titulo">Muestras</span>
+    <span class="tarjeta-valor">{{ est.total }}</span>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta-titulo">Rostros distintos</span>
+    <span class="tarjeta-valor">{{ est.rostros_distintos }}</span>
+    <span class="tarjeta-nota">máx. {{ est.rostros_max }} a la vez</span>
+  </div>
+  <div class="tarjeta">
+    <span class="tarjeta-titulo">Confianza media</span>
+    <span class="tarjeta-valor">{% widthratio est.confianza_media 1 100 %}%</span>
+  </div>
+</section>
+
+<section class="bloque">
+  <h2>Índice de ánimo</h2>
+  <div class="animo" role="img" aria-label="Positivo {{ est.animo.positivo }}%, neutro {{ est.animo.neutro }}%, negativo {{ est.animo.negativo }}%">
+    {% if est.animo.positivo %}<div class="animo-positivo" style="flex: {{ est.animo.positivo|stringformat:'s' }}">{{ est.animo.positivo }}%</div>{% endif %}
+    {% if est.animo.neutro %}<div class="animo-neutro" style="flex: {{ est.animo.neutro|stringformat:'s' }}">{{ est.animo.neutro }}%</div>{% endif %}
+    {% if est.animo.negativo %}<div class="animo-negativo" style="flex: {{ est.animo.negativo|stringformat:'s' }}">{{ est.animo.negativo }}%</div>{% endif %}
+  </div>
+  <p class="leyenda suave">
+    <span class="punto animo-positivo"></span>Positivo (felicidad)
+    <span class="punto animo-neutro"></span>Neutro (neutral, sorpresa)
+    <span class="punto animo-negativo"></span>Negativo (tristeza, enojo, disgusto, miedo, desprecio)
+  </p>
+</section>
+
+<section class="graficos">
+  <div class="bloque">
+    <h2>Emociones a lo largo del tiempo</h2>
+    <p class="suave">
+      Cada barra es un intervalo de {{ est.linea_tiempo.intervalo_s }} s y se divide según el % de muestras de cada emoción.
+      Con una sola persona, cada barra muestra su emoción en ese momento; con varias, el reparto entre ellas.
+      Las barras grises indican que no se detectó ningún rostro.
+    </p>
+    <div class="grafico grande"><canvas id="grafico-tiempo"></canvas></div>
+  </div>
+  <div class="bloque">
+    <h2>Distribución</h2>
+    <div class="grafico"><canvas id="grafico-distribucion"></canvas></div>
+    <ul class="lista-distribucion">
+      {% for d in est.distribucion %}{% if d.total %}
+      <li><span class="punto" style="background: {{ d.info.color }}"></span>{{ d.info.emoji }} {{ d.info.etiqueta }} <span class="suave">{{ d.porcentaje }}%</span></li>
+      {% endif %}{% endfor %}
+    </ul>
+  </div>
+</section>
+
+<section class="bloque">
+  <h2>Por rostro</h2>
+  <div class="tabla-contenedor">
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>Rostro</th>
+          <th>Emoción predominante</th>
+          <th class="num">Muestras</th>
+          <th class="num">Confianza media</th>
+          <th>Visto entre</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in est.por_rostro %}
+        <tr>
+          <td>#{{ r.rostro_id }}</td>
+          <td><span class="insignia" style="--c: {{ r.info.color }}">{{ r.info.emoji }} {{ r.info.etiqueta }}</span> <span class="suave">{{ r.porcentaje }}%</span></td>
+          <td class="num">{{ r.registros }}</td>
+          <td class="num">{% widthratio r.confianza_media 1 100 %}%</td>
+          <td>{{ r.primera|date:"H:i:s" }} – {{ r.ultima|date:"H:i:s" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% else %}
+<div class="vacio">
+  <p>Esta sesión no tiene registros: no se detectó ningún rostro mientras estuvo activa.</p>
+  <a class="btn primario" href="{% url 'emociones:camara' %}">Iniciar otra sesión</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if est.total %}
+{{ datos_grafico|json_script:"datos-grafico" }}
+<script src="{% static 'emociones/vendor/chart.umd.min.js' %}"></script>
+<script src="{% static 'emociones/js/sesion.js' %}"></script>
+{% endif %}
+{% endblock %}

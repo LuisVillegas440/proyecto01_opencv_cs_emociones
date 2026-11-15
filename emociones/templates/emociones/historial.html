@@ -1,0 +1,65 @@
+{% extends 'emociones/base.html' %}
+{% block titulo %}Historial · EmoVisión{% endblock %}
+{% block contenido %}
+<div class="encabezado">
+  <div>
+    <h1>Historial de sesiones</h1>
+    <p class="suave">Cada vez que se inicia la cámara se crea una sesión. Se guarda una muestra por rostro cada segundo.</p>
+  </div>
+</div>
+
+{% if pagina.object_list %}
+<div class="tabla-contenedor">
+  <table class="tabla">
+    <thead>
+      <tr>
+        <th>Sesión</th>
+        <th>Inicio</th>
+        <th class="num">Duración</th>
+        <th class="num">Registros</th>
+        <th class="num">Rostros</th>
+        <th>Emoción predominante</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for sesion in pagina %}
+      <tr>
+        <td>
+          <a href="{% url 'emociones:detalle_sesion' sesion.pk %}">{{ sesion.nombre }}</a>
+          {% if sesion.en_curso %}<span class="insignia en-curso">en curso</span>{% endif %}
+        </td>
+        <td>{{ sesion.inicio|date:"d/m/Y H:i" }}</td>
+        <td class="num">{{ sesion.duracion_texto }}</td>
+        <td class="num">{{ sesion.total }}</td>
+        <td class="num">{{ sesion.rostros }}</td>
+        <td>
+          {% if sesion.predominante_info %}
+          <span class="insignia" style="--c: {{ sesion.predominante_info.color }}">{{ sesion.predominante_info.emoji }} {{ sesion.predominante_info.etiqueta }}</span>
+          {% else %}<span class="suave">—</span>{% endif %}
+        </td>
+        <td class="acciones">
+          <a href="{% url 'emociones:detalle_sesion' sesion.pk %}">Ver</a>
+          {% if sesion.total %}<a href="{% url 'emociones:exportar_csv' sesion.pk %}">CSV</a>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if pagina.has_other_pages %}
+<nav class="paginacion">
+  {% if pagina.has_previous %}<a href="?pagina={{ pagina.previous_page_number }}">← Anterior</a>{% endif %}
+  <span>Página {{ pagina.number }} de {{ pagina.paginator.num_pages }}</span>
+  {% if pagina.has_next %}<a href="?pagina={{ pagina.next_page_number }}">Siguiente →</a>{% endif %}
+</nav>
+{% endif %}
+
+{% else %}
+<div class="vacio">
+  <p>Todavía no hay sesiones guardadas.</p>
+  <a class="btn primario" href="{% url 'emociones:camara' %}">Iniciar una sesión</a>
+</div>
+{% endif %}
+{% endblock %}

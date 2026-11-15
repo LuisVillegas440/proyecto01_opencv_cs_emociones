@@ -1,0 +1,49 @@
+{% extends 'emociones/base.html' %}
+{% load static %}
+{% block titulo %}Cámara en vivo · EmoVisión{% endblock %}
+{% block contenido %}
+{% csrf_token %}
+<section class="camara-layout">
+  <div class="visor">
+    <video id="video" autoplay playsinline muted></video>
+    <canvas id="overlay"></canvas>
+    <div id="mensaje" class="mensaje">Presiona «Iniciar cámara» para comenzar.</div>
+  </div>
+
+  <aside class="panel">
+    <h2>Control</h2>
+    <label class="campo">
+      <span>Nombre de la sesión</span>
+      <input id="nombre-sesion" type="text" maxlength="120" placeholder="Ej.: Clase de Construcción">
+    </label>
+    <div class="botones">
+      <button id="btn-iniciar" class="btn primario">Iniciar cámara</button>
+      <button id="btn-detener" class="btn" disabled>Detener</button>
+    </div>
+    <h2>Emoción detectada</h2>
+    <div id="emocion-principal" class="emocion-principal">—</div>
+    <div id="barras" class="barras"></div>
+    <h2>Estado</h2>
+    <dl class="estado">
+      <dt>Conexión</dt><dd id="estado-conexion">—</dd>
+      <dt>Sesión</dt><dd id="estado-sesion">—</dd>
+      <dt>Guardados</dt><dd id="estado-guardados">—</dd>
+      <dt>Resolución</dt><dd id="estado-resolucion">—</dd>
+      <dt>Rostros</dt><dd id="estado-rostros">—</dd>
+      <dt>Servidor</dt><dd id="estado-ms">—</dd>
+      <dt>FPS análisis</dt><dd id="estado-fps">—</dd>
+    </dl>
+  </aside>
+</section>
+{% endblock %}
+{% block scripts %}
+{{ presentacion|json_script:"presentacion-emociones" }}
+<script>
+  window.URL_DETALLE_SESION = "{% url 'emociones:detalle_sesion' 0 %}";
+  window.URL_ANALIZAR = "{% url 'emociones:analizar' %}";
+  window.URL_INICIAR_SESION = "{% url 'emociones:iniciar_sesion' %}";
+  // El 0 se reemplaza por el id real de la sesión en camara.js.
+  window.URL_FINALIZAR_SESION = "{% url 'emociones:finalizar_sesion' 0 %}";
+</script>
+<script src="{% static 'emociones/js/camara.js' %}"></script>
+{% endblock %}
