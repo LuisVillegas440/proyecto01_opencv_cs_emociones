@@ -2,9 +2,6 @@
 
 Aplicación web en **Django** que captura video de la cámara desde el navegador, lo procesa con **OpenCV** para **detectar rostros** y **reconocer la emoción** de cada uno, y muestra los resultados en vivo sobre el video. Cada sesión de análisis se guarda en la base de datos y se puede revisar luego en un historial con estadísticas, gráficos y exportación a CSV.
 
-> Práctica 3 · Construcción de Software · Universidad Estatal de Milagro (UNEMI)
-> Enfoque elegido: **detección de emociones mediante expresiones faciales**.
-
 <!-- Agregar capturas en docs/capturas/ y descomentar:
 ![Cámara en vivo](docs/capturas/camara.png)
 ![Detalle de una sesión](docs/capturas/detalle.png)
@@ -174,19 +171,21 @@ Son 35 pruebas que cubren:
 - **Sesiones** (`test_sesiones.py`): iniciar y finalizar sesiones, el límite de 1 muestra/segundo, que no se guarde nada en sesiones cerradas, y el panel de admin.
 - **Historial** (`test_historial.py`): estadísticas, línea de tiempo, páginas y exportación CSV.
 
-### Pruebas de usuario
+### Pruebas manuales
 
-| # | Caso | Resultado esperado | Resultado obtenido |
-|---|---|---|---|
-| 1 | Buena iluminación, 1 persona | Detecta el rostro y la emoción cambia con los gestos | Pendiente |
-| 2 | Poca luz o luz lateral | Sigue detectando, quizá con menor confianza | Pendiente |
-| 3 | 2–3 personas | Una caja por persona, cada una con su emoción | Pendiente |
-| 4 | Nadie frente a la cámara | Panel en «Sin rostro», sin errores | Pendiente |
-| 5 | Rostro de perfil o cubierto | No se cae; puede perder el rostro un momento | Pendiente |
-| 6 | Permiso de cámara denegado | Mensaje claro en pantalla | Pendiente |
-| 7 | Detener e iniciar de nuevo | Se crea una sesión nueva | Pendiente |
-| 8 | Cerrar la pestaña sin detener | La sesión queda finalizada en el historial | Pendiente |
-| 9 | Exportar CSV y abrirlo en Excel | Se ven bien las tildes y las columnas | Pendiente |
+Casos para comprobar el comportamiento con la cámara real:
+
+| # | Caso | Resultado esperado |
+|---|---|---|
+| 1 | Buena iluminación, 1 persona | Detecta el rostro y la emoción cambia con los gestos |
+| 2 | Poca luz o luz lateral | Sigue detectando, quizá con menor confianza |
+| 3 | 2–3 personas | Una caja por persona, cada una con su emoción |
+| 4 | Nadie frente a la cámara | Panel en «Sin rostro», sin errores |
+| 5 | Rostro de perfil o cubierto | No se cae; puede perder el rostro un momento |
+| 6 | Permiso de cámara denegado | Mensaje claro en pantalla |
+| 7 | Detener e iniciar de nuevo | Se crea una sesión nueva |
+| 8 | Cerrar la pestaña sin detener | La sesión queda finalizada en el historial |
+| 9 | Exportar CSV y abrirlo en Excel | Se ven bien las tildes y las columnas |
 
 ---
 
@@ -207,18 +206,3 @@ Son 35 pruebas que cubren:
 - Imagen de prueba (`emociones/tests/imagenes/con_rostro.jpg`): muestra `messi5.jpg` de los [ejemplos de OpenCV](https://github.com/opencv/opencv/tree/4.x/samples/data).
 
 Las licencias de cada modelo y librería se pueden consultar en sus repositorios originales.
-
----
-
-## Integrantes
-
-| Nombre | Rol |
-|---|---|
-| _Integrante 1_ | |
-| _Integrante 2_ | |
-| _Integrante 3_ | |
-| _Integrante 4_ | |
-| _Integrante 5_ | |
-
-**Docente de la asignatura:** Rodrigo Josué Guevara Reyes
-**Docente de la práctica:** Mariana Madeleine Almache Sanisaca
