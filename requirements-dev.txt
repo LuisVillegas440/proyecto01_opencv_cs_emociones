@@ -1,0 +1,5 @@
+# Dependencias para desarrollo y pruebas (no son necesarias para usar la aplicación).
+# Instalar con: pip install -r requirements-dev.txt
+-r requirements.txt
+playwright==1.65.2
+coverage==7.17.4

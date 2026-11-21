@@ -1,0 +1,15 @@
+# Configuración de cobertura de código (coverage.py).
+# Se mide el código de la aplicación, no el de las pruebas ni el autogenerado.
+[run]
+source =
+    emociones
+    config
+omit =
+    */migrations/*
+    */tests/*
+    config/asgi.py
+    config/wsgi.py
+
+[report]
+show_missing = true
+skip_empty = true

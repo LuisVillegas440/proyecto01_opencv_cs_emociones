@@ -5,3 +5,7 @@ __pycache__/
 db.sqlite3
 .env
 .vscode/
+
+# Capturas generadas por las pruebas funcionales
+evidencias/
+.coverage

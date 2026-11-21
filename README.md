@@ -142,6 +142,10 @@ proyecto01_opencv_cs_emociones/
 │   ├── templates/emociones/    # base, camara, historial, sesion_detalle
 │   ├── static/emociones/       # css, js (camara.js, sesion.js) y Chart.js
 │   └── tests/                  # Pruebas automáticas
+│       ├── unitarias/          #   funciones y clases aisladas (OpenCV, estadísticas…)
+│       ├── integracion/        #   rutas de Django de punta a punta
+│       ├── funcionales/        #   casos de uso en navegador real (Playwright)
+│       └── utilidades.py       #   datos de prueba compartidos
 ├── modelos_ml/                 # Modelos ONNX (YuNet y FER+)
 ├── manage.py
 ├── requirements.txt
@@ -162,14 +166,73 @@ proyecto01_opencv_cs_emociones/
 ### Pruebas automáticas
 
 ```bash
-python manage.py test emociones
+pip install -r requirements-dev.txt                     # una vez: agrega Playwright
+
+python manage.py test emociones                         # todas (42)
+python manage.py test emociones.tests.unitarias         # solo unitarias (16)
+python manage.py test emociones.tests.integracion       # solo integración (19)
+python manage.py test emociones.tests.funcionales       # solo funcionales (7)
 ```
 
-Son 35 pruebas que cubren:
-- **Visión** (`test_vision.py`): detección en una imagen con rostro y sin rostro, que las probabilidades sumen 1, el pipeline completo y el seguimiento (id estable, suavizado y descarte de rostros perdidos).
-- **API** (`test_api.py`): peticiones sin frame, con imagen inválida, con método incorrecto y con un frame válido.
-- **Sesiones** (`test_sesiones.py`): iniciar y finalizar sesiones, el límite de 1 muestra/segundo, que no se guarde nada en sesiones cerradas, y el panel de admin.
-- **Historial** (`test_historial.py`): estadísticas, línea de tiempo, páginas y exportación CSV.
+> Las pruebas funcionales usan Microsoft Edge o Google Chrome si están instalados; si no, ejecutar `playwright install chromium`. Sin Playwright, esas 7 pruebas se omiten y el resto se ejecuta igual.
+
+**Pruebas unitarias** (`emociones/tests/unitarias/`): prueban una función o clase de forma aislada.
+
+| Archivo | Qué verifica |
+|---|---|
+| `test_vision.py` | Que existan los modelos, la detección con y sin rostro, que las probabilidades sumen 1, el lote vacío, el pipeline completo y las imágenes inválidas |
+| `test_seguimiento.py` | El cálculo de IoU, el id estable y el suavizado, que un rostro lejano reciba un id nuevo y el descarte de rostros perdidos |
+| `test_estadisticas.py` | La emoción predominante, el índice de ánimo, la línea de tiempo, el límite de puntos y las sesiones vacías |
+| `test_modelos.py` | La emoción predominante calculada desde la base de datos |
+
+**Pruebas de integración** (`emociones/tests/integracion/`): recorren el flujo URL → vista → OpenCV / base de datos → respuesta.
+
+| Archivo | Qué verifica |
+|---|---|
+| `test_rutas.py` | Que la cámara, el historial y el detalle carguen correctamente, y el error 404 |
+| `test_api_analizar.py` | La API con un frame válido, sin frame, con imagen inválida, con el método incorrecto y con un rostro real |
+| `test_sesiones.py` | Iniciar y finalizar sesiones, el guardado limitado a 1 muestra/segundo y que no se guarde nada en sesiones cerradas |
+| `test_admin.py` | Los listados y el detalle del panel de administración |
+| `test_exportar_csv.py` | El formato, las columnas y el contenido del CSV |
+
+**Pruebas funcionales** (`emociones/tests/funcionales/`): levantan el servidor, abren un navegador real sin ventana y usan una **cámara simulada** (un video generado a partir de una imagen) para recorrer los casos de uso como lo haría un usuario. Cada prueba guarda una captura de pantalla en `evidencias/funcionales/`.
+
+| Caso de uso | Qué se valida |
+|---|---|
+| CU-01 Inicio | La página carga con sus controles, las 8 emociones y la navegación |
+| CU-02 Detección en video | Al iniciar la cámara se detecta el rostro, se dibuja el recuadro sobre el video, las probabilidades suman 100 % y el análisis alcanza al menos 2 análisis por segundo |
+| CU-03 Sesión y resultados | Al detener se guarda la sesión con sus registros, y el detalle muestra las tarjetas y los gráficos |
+| CU-04 Historial y CSV | La sesión aparece en el historial y el CSV se descarga con el contenido correcto |
+| CU-05 Sin rostro | Sin personas frente a la cámara, el sistema sigue conectado, sin errores y sin guardar registros |
+| CU-06 Permiso denegado | Si se bloquea la cámara se muestra un mensaje claro y no se crea ninguna sesión |
+| CU-07 Administración | Un administrador inicia sesión en /admin/ y ve las sesiones con su duración, registros y emoción predominante |
+
+En todas se verifica además que la página no registre errores de JavaScript ni respuestas HTTP con error.
+
+Para ver el navegador mientras se ejecutan, por ejemplo en una demostración:
+
+```bash
+set PRUEBAS_VISIBLES=1                                   # Windows (cmd)
+python manage.py test emociones.tests.funcionales
+```
+
+### Reporte de pruebas y cobertura
+
+```bash
+python herramientas/reporte_pruebas.py
+```
+
+Ejecuta todas las pruebas midiendo la **cobertura de código** (qué porcentaje del código de la aplicación se ejecuta durante las pruebas) y genera en `evidencias/`:
+
+| Archivo | Contenido |
+|---|---|
+| `reporte_pruebas.html` | Resumen por tipo de prueba, detalle de cada una con su descripción y tiempo, cobertura por archivo y capturas de las pruebas funcionales |
+| `log_pruebas.txt` | Log completo de la ejecución |
+| `cobertura.txt` | Cobertura por archivo en texto |
+| `cobertura_html/index.html` | Cobertura línea por línea |
+| `funcionales/*.png` | Capturas tomadas por las pruebas funcionales |
+
+Última ejecución: **42 pruebas aprobadas y 99 % de cobertura**. El script termina con código de salida 1 si alguna prueba falla.
 
 ### Pruebas manuales
 
